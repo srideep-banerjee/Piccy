@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Piccy</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="liked_screen">Liked Screen</string>
+    <string name="home_screen">Home Screen</string>
+    <string name="following_screen">Following Screen</string>
+</resources>

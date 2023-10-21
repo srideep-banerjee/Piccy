@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main_activity"
+    app:startDestination="@id/menu_home">
+
+    <fragment
+        android:id="@+id/menu_home"
+        android:name="com.example.piccy.HomeFragment"
+        android:label="menu_home"
+        tools:layout="@layout/menu_home" />
+    <fragment
+        android:id="@+id/menu_following"
+        android:name="com.example.piccy.FollowingFragment"
+        android:label="menu_following"
+        tools:layout="@layout/menu_following" />
+    <fragment
+        android:id="@+id/menu_liked"
+        android:name="com.example.piccy.LikedFragment"
+        android:label="menu_liked"
+        tools:layout="@layout/menu_liked" />
+</navigation>
