@@ -10,15 +10,20 @@ import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.example.piccy.databinding.ActivityMainBinding
 import nl.joery.animatedbottombar.AnimatedBottomBar
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
+    private lateinit var mainBinding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        mainBinding = ActivityMainBinding.inflate(layoutInflater)
+        val view = mainBinding.root
+        setContentView(view)
 
         Log.i("MSG", "Hello world")
 
@@ -30,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         Log.i("MSG", "On create options menu called")
         menuInflater.inflate(R.menu.bottom_navigation_menu, menu)
-        var bottom_bar = findViewById<AnimatedBottomBar>(R.id.bottom_bar)
+        var bottom_bar = mainBinding.bottomBar
         bottom_bar.setupWithNavController(menu!!, navController)
         return true
     }
