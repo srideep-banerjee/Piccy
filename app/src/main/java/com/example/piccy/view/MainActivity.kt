@@ -1,17 +1,18 @@
-package com.example.piccy
+package com.example.piccy.view
 
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
-import android.widget.PopupMenu
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.example.piccy.R
 import com.example.piccy.databinding.ActivityMainBinding
-import nl.joery.animatedbottombar.AnimatedBottomBar
+import com.example.piccy.viewmodels.MainViewModel
+import com.example.piccy.viewmodels.Screen
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,19 +26,25 @@ class MainActivity : AppCompatActivity() {
         val view = mainBinding.root
         setContentView(view)
 
-        Log.i("MSG", "Hello world")
+        //Get ViewModel object
+        val mainViewModel by viewModels<MainViewModel>()
 
+        //Set up navigation bar
         navController = Navigation.findNavController(this, R.id.fragmentContainerView)
-        setupActionBarWithNavController(navController)
-        supportActionBar?.hide()
-    }
+        mainBinding.bottomBar.setupWithNavController(navController)
+        mainBinding.bottomBar.setOnItemSelectedListener {
+            mainViewModel.currentScreen.value = when(it.itemId) {
+                R.id.menu_home -> Screen.HOME
+                R.id.menu_following -> Screen.FOLLOWING
+                R.id.menu_liked -> Screen.LIKES
+                else -> {
+                    Log.i("MSG", "Unknown menu id selected ${it.title} -> ${it.itemId}")
+                    Screen.HOME
+                }
+            }
+            return@setOnItemSelectedListener true
+        }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        Log.i("MSG", "On create options menu called")
-        menuInflater.inflate(R.menu.bottom_navigation_menu, menu)
-        var bottom_bar = mainBinding.bottomBar
-        bottom_bar.setupWithNavController(menu!!, navController)
-        return true
     }
 
 //    val PICK_IMAGE = 1

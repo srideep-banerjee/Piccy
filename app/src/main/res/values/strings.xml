@@ -4,4 +4,7 @@
     <string name="liked_screen">Liked Screen</string>
     <string name="home_screen">Home Screen</string>
     <string name="following_screen">Following Screen</string>
+    <string name="home">Home</string>
+    <string name="following">Following</string>
+    <string name="liked">Liked</string>
 </resources>
