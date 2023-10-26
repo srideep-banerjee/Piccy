@@ -2,12 +2,11 @@ package com.example.piccy.view
 
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
-import androidx.navigation.Navigation
-import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.NavDestination
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.piccy.R
 import com.example.piccy.databinding.ActivityMainBinding
@@ -30,22 +29,26 @@ class MainActivity : AppCompatActivity() {
         val mainViewModel by viewModels<MainViewModel>()
 
         //Set up navigation bar
-        navController = Navigation.findNavController(this, R.id.fragmentContainerView)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
+        navController = navHostFragment.navController
+
+        //Merge Navigation Controller with Bottom Navigation View
         mainBinding.bottomBar.setupWithNavController(navController)
-        mainBinding.bottomBar.setOnItemSelectedListener {
-            mainViewModel.currentScreen.value = when(it.itemId) {
+
+        //Update current screen in view model
+        navController.addOnDestinationChangedListener { _, navDestination: NavDestination, _ ->
+            mainViewModel.currentScreen.value = when(navDestination.id) {
                 R.id.menu_home -> Screen.HOME
                 R.id.menu_following -> Screen.FOLLOWING
                 R.id.menu_liked -> Screen.LIKES
                 else -> {
-                    Log.i("MSG", "Unknown menu id selected ${it.title} -> ${it.itemId}")
+                    Log.i("MSG", "Unknown menu id selected ${navDestination.label} -> ${navDestination.id}")
                     Screen.HOME
                 }
             }
-            return@setOnItemSelectedListener true
         }
-
     }
+
 
 //    val PICK_IMAGE = 1
 //    lateinit var f:File
