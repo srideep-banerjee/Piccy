@@ -13,4 +13,9 @@
         <item name="android:navigationBarColor">?attr/colorOnPrimary</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="Theme.Piccy.Toolbar" parent="Theme.Piccy">
+        <item name="android:textColorSecondary">?attr/colorOnPrimary</item>
+        <item name="android:textColorPrimary">?attr/colorOnPrimary</item>
+    </style>
 </resources>

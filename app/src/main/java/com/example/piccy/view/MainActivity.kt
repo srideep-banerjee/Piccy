@@ -48,6 +48,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        //Setup toolbar
+        setSupportActionBar(mainBinding.toolbar)
+
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
