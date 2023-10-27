@@ -10,11 +10,6 @@ import androidx.lifecycle.Observer
 import com.example.piccy.databinding.MenuHomeBinding
 import com.example.piccy.viewmodels.HomeViewMode
 
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class HomeFragment : Fragment() {
     private lateinit var menuHomeBinding: MenuHomeBinding
     override fun onCreateView(
