@@ -3,8 +3,11 @@ package com.example.piccy.view
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuCompat
+import androidx.core.view.get
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -52,11 +55,25 @@ class MainActivity : AppCompatActivity() {
         //Setup toolbar
         setSupportActionBar(mainBinding.toolbar)
 
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.actionbar_menu, menu)
+        val searchView = menu?.findItem(R.id.app_bar_search)
+        val profileIcon = menu?.findItem(R.id.self_profile_icon)
+        searchView?.setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                profileIcon?.isVisible = false
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                profileIcon?.isVisible = true
+                this@MainActivity.invalidateOptionsMenu()
+                return true
+            }
+
+        })
         return super.onCreateOptionsMenu(menu)
     }
 
