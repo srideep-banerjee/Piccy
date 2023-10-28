@@ -6,7 +6,9 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuCompat
+import androidx.core.view.MenuItemCompat
 import androidx.core.view.get
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -61,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.actionbar_menu, menu)
         val searchView = menu?.findItem(R.id.app_bar_search)
         val profileIcon = menu?.findItem(R.id.self_profile_icon)
+        (searchView?.actionView as SearchView).maxWidth = Int.MAX_VALUE
         searchView?.setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                 profileIcon?.isVisible = false
