@@ -4,7 +4,22 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class MainViewModel: ViewModel() {
-    val currentScreen: MutableLiveData<Screen> by lazy {
-        MutableLiveData<Screen>(Screen.HOME)
+    private var currentScreen = Screen.HOME
+
+    var searchViewExpanded :MutableLiveData<Boolean> = MutableLiveData(false)
+        private set
+
+    var searchQueryText: MutableLiveData<String> = MutableLiveData("")
+
+    fun updateScreen(screen: Screen) {
+        if(screen != currentScreen) {
+            searchViewExpanded.value = false
+            searchQueryText.value = ""
+        }
+        currentScreen = screen
+    }
+
+    fun updateSearchQueryText(text: String) {
+        searchQueryText.value = text
     }
 }

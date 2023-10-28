@@ -7,9 +7,7 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.MenuCompat
-import androidx.core.view.MenuItemCompat
-import androidx.core.view.get
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -23,6 +21,8 @@ import com.example.piccy.viewmodels.Screen
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var mainBinding: ActivityMainBinding
+    private lateinit var mainViewModel: MainViewModel
+    private lateinit var searchViewExpansionObserver: Observer<Boolean>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,9 +33,11 @@ class MainActivity : AppCompatActivity() {
 
         //Get ViewModel object
         val mainViewModel by viewModels<MainViewModel>()
+        this.mainViewModel = mainViewModel
 
         //Set up navigation bar
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         navController = navHostFragment.navController
 
         //Merge Navigation Controller with Bottom Navigation View
@@ -43,15 +45,19 @@ class MainActivity : AppCompatActivity() {
 
         //Update current screen in view model
         navController.addOnDestinationChangedListener { _, navDestination: NavDestination, _ ->
-            mainViewModel.currentScreen.value = when(navDestination.id) {
+            val newScreen = when (navDestination.id) {
                 R.id.menu_home -> Screen.HOME
                 R.id.menu_following -> Screen.FOLLOWING
                 R.id.menu_liked -> Screen.LIKES
                 else -> {
-                    Log.i("MSG", "Unknown menu id selected ${navDestination.label} -> ${navDestination.id}")
+                    Log.i(
+                        "MSG",
+                        "Unknown menu id selected ${navDestination.label} -> ${navDestination.id}"
+                    )
                     Screen.HOME
                 }
             }
+            mainViewModel.updateScreen(newScreen)
         }
 
         //Setup toolbar
@@ -59,24 +65,61 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //Under changes
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        Log.i("MSG", "On Create Options Menu called")
         menuInflater.inflate(R.menu.actionbar_menu, menu)
-        val searchView = menu?.findItem(R.id.app_bar_search)
+        val searchViewMenu = menu?.findItem(R.id.app_bar_search)
         val profileIcon = menu?.findItem(R.id.self_profile_icon)
-        (searchView?.actionView as SearchView).maxWidth = Int.MAX_VALUE
-        searchView?.setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
+        val searchView = searchViewMenu?.actionView as SearchView
+
+        //Configure search view to take up entire space in action bar
+        searchView.maxWidth = Int.MAX_VALUE
+
+        //if observer already added aka menu recreated, remove previous observer
+        if(this::searchViewExpansionObserver.isInitialized && mainViewModel.searchViewExpanded.hasActiveObservers()) {
+            mainViewModel.searchViewExpanded.removeObserver(searchViewExpansionObserver)
+            Log.i("MSG", "Observer already present, previous observer removed.")
+        }
+        searchViewExpansionObserver = Observer { isExpanded ->
+            if (isExpanded != searchViewMenu.isActionViewExpanded) {
+                if (isExpanded) {
+                    searchViewMenu.expandActionView()
+                    profileIcon?.isVisible = false
+                } else {
+                    searchViewMenu.collapseActionView()
+                    profileIcon?.isVisible = true
+                }
+            }
+        }
+
+        mainViewModel.searchViewExpanded.observe(this, searchViewExpansionObserver)
+
+        searchViewMenu.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                profileIcon?.isVisible = false
+                mainViewModel.searchViewExpanded.value = true
                 return true
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                profileIcon?.isVisible = true
-                this@MainActivity.invalidateOptionsMenu()
+                mainViewModel.searchViewExpanded.value = false
                 return true
             }
 
         })
+
+        searchView.setQuery(mainViewModel.searchQueryText.value, false)
+        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                mainViewModel.updateSearchQueryText(newText?:"")
+                return true
+            }
+        })
+
         return super.onCreateOptionsMenu(menu)
     }
 
