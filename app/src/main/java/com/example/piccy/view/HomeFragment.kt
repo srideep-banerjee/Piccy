@@ -17,7 +17,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         menuHomeBinding = MenuHomeBinding.inflate(inflater, container, false)
-        menuHomeBinding.lifecycleOwner = this
+        menuHomeBinding.lifecycleOwner = viewLifecycleOwner
 
         val model by viewModels<HomeViewMode>()
 
