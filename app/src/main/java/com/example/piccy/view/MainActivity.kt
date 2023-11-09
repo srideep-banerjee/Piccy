@@ -1,5 +1,6 @@
 package com.example.piccy.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -119,6 +120,12 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
+
+        profileIcon?.setOnMenuItemClickListener {
+            val intent = Intent(this@MainActivity, ProfileActivity::class.java)
+            startActivity(intent)
+            return@setOnMenuItemClickListener true
+        }
 
         return super.onCreateOptionsMenu(menu)
     }
