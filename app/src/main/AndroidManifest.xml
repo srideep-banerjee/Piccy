@@ -18,6 +18,7 @@
         <activity
             android:name=".view.ProfileActivity"
             android:theme="@style/Theme.Piccy.ActionBar"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false" />
         <activity
             android:name=".view.MainActivity"
