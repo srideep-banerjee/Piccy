@@ -16,7 +16,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.piccy.R
 import com.example.piccy.databinding.ActivityMainBinding
 import com.example.piccy.viewmodels.MainViewModel
-import com.example.piccy.viewmodels.Screen
+import com.example.piccy.viewmodels.MainScreen
 
 
 class MainActivity : AppCompatActivity() {
@@ -47,15 +47,15 @@ class MainActivity : AppCompatActivity() {
         //Update current screen in view model
         navController.addOnDestinationChangedListener { _, navDestination: NavDestination, _ ->
             val newScreen = when (navDestination.id) {
-                R.id.menu_home -> Screen.HOME
-                R.id.menu_following -> Screen.FOLLOWING
-                R.id.menu_liked -> Screen.LIKES
+                R.id.menu_home -> MainScreen.HOME
+                R.id.menu_following -> MainScreen.FOLLOWING
+                R.id.menu_liked -> MainScreen.LIKES
                 else -> {
                     Log.i(
                         "MSG",
                         "Unknown menu id selected ${navDestination.label} -> ${navDestination.id}"
                     )
-                    Screen.HOME
+                    MainScreen.HOME
                 }
             }
             mainViewModel.updateScreen(newScreen)

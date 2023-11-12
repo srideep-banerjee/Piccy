@@ -1,6 +1,6 @@
 package com.example.piccy.viewmodels
 
-enum class Screen {
+enum class MainScreen {
     HOME,
     LIKES,
     FOLLOWING;
