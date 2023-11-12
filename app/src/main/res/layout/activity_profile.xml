@@ -16,6 +16,7 @@
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline1"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="200dp"
         app:srcCompat="@drawable/user_circle_cutout"
         app:tint="?attr/colorPrimary" />
 
@@ -35,7 +36,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView2"
-        android:name="com.example.piccy.view.SignupFragment"
+        android:name="com.example.piccy.view.AnonymousFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
