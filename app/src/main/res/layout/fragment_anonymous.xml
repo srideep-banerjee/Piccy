@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:text="Browsing Anonymously"
-        android:textColor="?attr/colorPrimaryDark"
+        android:textColor="?attr/colorPrimary"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/profileSubheadingText"
         app:layout_constraintEnd_toEndOf="parent"

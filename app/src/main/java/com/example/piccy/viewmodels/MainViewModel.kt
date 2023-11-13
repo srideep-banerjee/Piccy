@@ -10,6 +10,7 @@ class MainViewModel: ViewModel() {
         private set
 
     var searchQueryText: MutableLiveData<String> = MutableLiveData("")
+        private set
 
     fun updateScreen(screen: MainScreen) {
         if(screen != currentScreen) {
