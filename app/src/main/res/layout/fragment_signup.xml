@@ -7,28 +7,30 @@
     tools:context=".view.SignupFragment">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/emailTextField"
+        android:id="@+id/emailLayoutSignup"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:hint="Email"
-        app:layout_constraintBottom_toTopOf="@id/nameTextField"
+        app:layout_constraintBottom_toTopOf="@id/nameLayoutSignup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/emailEditTextSignup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text|textWebEmailAddress" />
+            android:inputType="text|textWebEmailAddress"
+            android:saveEnabled="false" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/nameTextField"
+        android:id="@+id/nameLayoutSignup"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -36,20 +38,22 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:hint="Username"
-        app:layout_constraintBottom_toTopOf="@id/passwordField"
+        app:layout_constraintBottom_toTopOf="@id/passwordLayoutSignup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/emailTextField">
+        app:layout_constraintTop_toBottomOf="@id/emailLayoutSignup">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/nameEditTextSignup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            android:saveEnabled="false" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/passwordField"
+        android:id="@+id/passwordLayoutSignup"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -60,13 +64,15 @@
         app:layout_constraintBottom_toTopOf="@id/signupButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/nameTextField"
+        app:layout_constraintTop_toBottomOf="@id/nameLayoutSignup"
         app:passwordToggleEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/passwordEditTextSignup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text|textWebPassword" />
+            android:inputType="text|textWebPassword"
+            android:saveEnabled="false" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -79,7 +85,7 @@
         app:layout_constraintBottom_toTopOf="@id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passwordField" />
+        app:layout_constraintTop_toBottomOf="@+id/passwordLayoutSignup" />
 
     <TextView
         android:id="@+id/textView2"
@@ -99,6 +105,7 @@
         android:id="@+id/loginLink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="8dp"
         android:text="Login"
         android:textColor="?attr/colorPrimary"
         android:textSize="16sp"

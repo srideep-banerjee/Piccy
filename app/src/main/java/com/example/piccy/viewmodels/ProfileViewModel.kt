@@ -1,24 +1,30 @@
 package com.example.piccy.viewmodels
 
+import android.text.Editable
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class ProfileViewModel: ViewModel() {
-    var currentScreen = MutableLiveData<ProfileScreen>(ProfileScreen.ANONYMOUS)
+class ProfileViewModel : ViewModel() {
+
+    var currentScreen = ProfileScreen.ANONYMOUS
         private set
 
-    var currentEntries = listOf("", "", "")
+    var currentEntries = mutableListOf("", "", "")
         private set
 
     fun updateScreen(screen: ProfileScreen) {
-        println("Update screen called, new screen: "+screen.screenName)
-        if (screen == currentScreen.value) return
+        if (screen == currentScreen) return
 
-        currentScreen.value = screen
-        currentEntries = listOf("", "", "")
+        currentScreen = screen
+        currentEntries = mutableListOf("", "", "")
     }
 
-    fun updateEntries(newEntries: List<String>) {
-        currentEntries = newEntries
+    fun updateEntryAt(index: Int, editable: Editable?) {
+        currentEntries[index] = editable?.toString() ?: ""
+    }
+
+    fun updateEntryAt(index: Int, str: String?) {
+        currentEntries[index] = str ?: ""
     }
 }

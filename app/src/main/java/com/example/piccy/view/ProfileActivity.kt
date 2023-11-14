@@ -14,9 +14,9 @@ import com.example.piccy.viewmodels.ProfileViewModel
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var profileBinding: ActivityProfileBinding
-    private lateinit var anonymousFragment: AnonymousFragment
-    private lateinit var signupFragment: SignupFragment
-    private lateinit var loginFragment: LoginFragment
+    private val anonymousFragment: AnonymousFragment by lazy { AnonymousFragment() }
+    private val signupFragment: SignupFragment by lazy { SignupFragment() }
+    private val loginFragment: LoginFragment by lazy { LoginFragment() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,25 +24,25 @@ class ProfileActivity : AppCompatActivity() {
         profileBinding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(profileBinding.root)
 
-        anonymousFragment = AnonymousFragment()
-        signupFragment = SignupFragment()
-        loginFragment = LoginFragment()
-
         val profileViewModel by viewModels<ProfileViewModel>()
 
-        val screenObserver = Observer<ProfileScreen>{
-
-            switchScreenTo(it)
-        }
-
         val manager = supportFragmentManager
-        manager.addOnBackStackChangedListener {
-            val name = ProfileScreen.getTypeByName(manager.getBackStackEntryAt(0).name?:ProfileScreen.ANONYMOUS.screenName)
-            profileViewModel.currentScreen.value = name?:ProfileScreen.ANONYMOUS
+
+        manager.setFragmentResultListener("nextScreen", this){ _, bundle ->
+            val screenName = bundle.getString("screenName")?:ProfileScreen.ANONYMOUS.screenName
+            switchScreenTo(ProfileScreen.getTypeByName(screenName))
         }
 
-        profileViewModel.currentScreen.observe(this, screenObserver)
+        switchScreenTo(profileViewModel.currentScreen)
 
+        manager.addOnBackStackChangedListener {
+            if(manager.backStackEntryCount == 0) profileViewModel.updateScreen(ProfileScreen.ANONYMOUS)
+            else {
+                val backStackName = manager.getBackStackEntryAt(0).name
+                val screenName = ProfileScreen.getTypeByName(backStackName!!)
+                profileViewModel.updateScreen(screenName)
+            }
+        }
     }
 
     private fun getFragmentInstanceByType(screen: ProfileScreen): Fragment {

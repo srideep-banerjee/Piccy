@@ -13,6 +13,6 @@ enum class ProfileScreen(val screenName: String) {
                 nameToOrdinalMap[value.screenName] = value
         }
 
-        fun getTypeByName(name: String) = nameToOrdinalMap[name]
+        fun getTypeByName(name: String) = nameToOrdinalMap[name]!!
     }
 }
