@@ -14,10 +14,10 @@ class Util {
         ) {
             textInputEditText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                    profileViewModel.updateEntryAt(index, s?.toString())
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    profileViewModel.updateEntryAt(index, s?.toString())
                 }
 
                 override fun afterTextChanged(s: Editable?) {
