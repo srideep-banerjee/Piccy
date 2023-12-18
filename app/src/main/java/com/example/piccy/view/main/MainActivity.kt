@@ -1,4 +1,4 @@
-package com.example.piccy.view
+package com.example.piccy.view.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -15,6 +15,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.piccy.R
 import com.example.piccy.databinding.ActivityMainBinding
+import com.example.piccy.view.profile.ProfileActivity
 import com.example.piccy.viewmodels.MainViewModel
 import com.example.piccy.viewmodels.MainScreen
 

@@ -1,4 +1,4 @@
-package com.example.piccy.view
+package com.example.piccy.view.main
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -1,4 +1,4 @@
-package com.example.piccy.view
+package com.example.piccy.view.profile
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

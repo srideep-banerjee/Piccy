@@ -1,7 +1,6 @@
-package com.example.piccy.view
+package com.example.piccy.view.profile
 
 import android.os.Bundle
-import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

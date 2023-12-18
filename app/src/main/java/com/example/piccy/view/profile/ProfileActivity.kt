@@ -1,12 +1,9 @@
-package com.example.piccy.view
+package com.example.piccy.view.profile
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Observer
 import com.example.piccy.databinding.ActivityProfileBinding
 import com.example.piccy.viewmodels.ProfileScreen
 import com.example.piccy.viewmodels.ProfileViewModel

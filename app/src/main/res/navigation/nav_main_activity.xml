@@ -7,17 +7,17 @@
 
     <fragment
         android:id="@+id/menu_home"
-        android:name="com.example.piccy.view.HomeFragment"
+        android:name="com.example.piccy.view.main.HomeFragment"
         android:label="menu_home"
         tools:layout="@layout/menu_home" />
     <fragment
         android:id="@+id/menu_following"
-        android:name="com.example.piccy.view.FollowingFragment"
+        android:name="com.example.piccy.view.main.FollowingFragment"
         android:label="menu_following"
         tools:layout="@layout/menu_following" />
     <fragment
         android:id="@+id/menu_liked"
-        android:name="com.example.piccy.view.LikedFragment"
+        android:name="com.example.piccy.view.main.LikedFragment"
         android:label="menu_liked"
         tools:layout="@layout/menu_liked" />
 </navigation>
