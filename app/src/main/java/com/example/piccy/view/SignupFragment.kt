@@ -29,6 +29,10 @@ class SignupFragment : Fragment() {
 
         val profileViewModel by activityViewModels<ProfileViewModel>()
 
+        signupFragmentBinding.signupButton.setOnClickListener {
+            profileViewModel.signup()
+        }
+
         signupFragmentBinding.emailEditTextSignup.setText(profileViewModel.currentEntries[0])
         signupFragmentBinding.nameEditTextSignup.setText(profileViewModel.currentEntries[1])
         signupFragmentBinding.passwordEditTextSignup.setText(profileViewModel.currentEntries[2])
