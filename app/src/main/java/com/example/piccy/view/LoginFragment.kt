@@ -16,17 +16,20 @@ import com.example.piccy.viewmodels.ProfileViewModel
 
 class LoginFragment : Fragment() {
 
-    private lateinit var loginFragmentBinding: FragmentLoginBinding
-    private val profileViewModel by activityViewModels<ProfileViewModel>()
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        loginFragmentBinding = FragmentLoginBinding.inflate(inflater, container, false)
+        val loginFragmentBinding = FragmentLoginBinding.inflate(inflater, container, false)
 
         loginFragmentBinding.signupLink.setOnClickListener {
             setFragmentResult("nextScreen", bundleOf("screenName" to ProfileScreen.SIGNUP.screenName))
+        }
+
+        val profileViewModel by activityViewModels<ProfileViewModel>()
+
+        loginFragmentBinding.loginButton.setOnClickListener {
+            profileViewModel.login()
         }
 
         loginFragmentBinding.emailEditTextLogin.setText(profileViewModel.currentEntries[0])
