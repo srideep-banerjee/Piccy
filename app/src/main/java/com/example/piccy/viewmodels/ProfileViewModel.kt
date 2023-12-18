@@ -1,11 +1,13 @@
 package com.example.piccy.viewmodels
 
-import android.text.Editable
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.piccy.model.FirebaseAuthenticator
 
 class ProfileViewModel : ViewModel() {
+
+    private val firebaseAuthenticator by lazy {
+        FirebaseAuthenticator()
+    }
 
     var currentScreen = ProfileScreen.ANONYMOUS
         private set
@@ -20,11 +22,16 @@ class ProfileViewModel : ViewModel() {
         currentEntries = mutableListOf("", "", "")
     }
 
-    fun updateEntryAt(index: Int, editable: Editable?) {
-        currentEntries[index] = editable?.toString() ?: ""
+    fun updateEntryAt(index: Int, str: String?) {
+        val fa = firebaseAuthenticator
+        currentEntries[index] = str ?: ""
     }
 
-    fun updateEntryAt(index: Int, str: String?) {
-        currentEntries[index] = str ?: ""
+    fun login() {
+        firebaseAuthenticator.logIn(currentEntries[0], currentEntries[1])
+    }
+
+    fun signup() {
+        firebaseAuthenticator.signUp(currentEntries[0], currentEntries[1], currentEntries[2])
     }
 }
