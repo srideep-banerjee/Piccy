@@ -12,6 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:navigationBarColor">?attr/colorOnPrimary</item>
         <!-- Customize your theme here. -->
+        <item name="colorBackgroundTranslucent">@color/white_translucent</item>
     </style>
 
     <style name="Theme.Piccy.ActionBar" parent="Theme.Piccy">
