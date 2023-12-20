@@ -4,12 +4,16 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
+
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class FirebaseAuthenticator implements Authenticator {
     private FirebaseAuth firebaseAuth;
@@ -27,17 +31,24 @@ public class FirebaseAuthenticator implements Authenticator {
         };
 
         userAuthenticationState = UserAuthenticationState.NONE;
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        if (firebaseUser != null) {
+            userAuthenticationState = UserAuthenticationState.REGISTERED;
+            if (firebaseUser.isEmailVerified()) {
+                userAuthenticationState = UserAuthenticationState.VERIFIED;
+            }
+        }
     }
 
     @Override
-    public void signUp(@NonNull String email, @NonNull String name, @NonNull String password) {
+    public void signUp(@NonNull String email, @NonNull String name, @NonNull String password, @NonNull BiConsumer<Boolean, String> onComplete) {
         statusUpdateListener.updateStatus("Registering email");
+        EmailAuthProvider.getCredential(email, password);
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .continueWith(task -> {
 
                     if (task.isSuccessful()) {
                         userAuthenticationState = UserAuthenticationState.REGISTERED;
-                        statusUpdateListener.updateStatus("Email registered, updating name");
 
                         UserProfileChangeRequest upcr = new UserProfileChangeRequest.Builder()
                                 .setDisplayName(name)
@@ -50,7 +61,6 @@ public class FirebaseAuthenticator implements Authenticator {
                 }).continueWith(task -> {
 
                     if (task.isSuccessful()) {
-                        statusUpdateListener.updateStatus("Name updated, sending verification email");
 
                         return firebaseAuth.getCurrentUser().sendEmailVerification();
                     } else if (task.getException() instanceof SignupException) {
@@ -60,27 +70,29 @@ public class FirebaseAuthenticator implements Authenticator {
                     }
                 }).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        userAuthenticationState = UserAuthenticationState.VERIFYING;
-                        statusUpdateListener.updateStatus("Verification email sent");
+                        onComplete.accept(true, null);
                     } else if (task.getException() instanceof SignupException) {
-                        statusUpdateListener.updateStatus(task.getException().getMessage());
+                        onComplete.accept(false, task.getException().getMessage());
                     } else {
-                        statusUpdateListener.updateStatus("Failed to send verification email");
+                        onComplete.accept(false, "Failed to send verification email");
                     }
                 });
     }
 
     @Override
-    public void logIn(@NonNull String email, @NonNull String password) {
+    public void logIn(@NonNull String email, @NonNull String password, @NonNull BiConsumer<Boolean,String> onComplete) {
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        if (task.isSuccessful()) {
-                            System.out.println("Sign in successful");
-                        } else {
-                            System.out.println("Sign in unsuccessful");
+                        userAuthenticationState = UserAuthenticationState.REGISTERED;
+
+                        if (firebaseAuth.getCurrentUser().isEmailVerified()) {
+                            userAuthenticationState = UserAuthenticationState.VERIFIED;
                         }
                     }
+
+                    String msg = task.isSuccessful() ? "" : task.getException().getMessage();
+                    if (task.isSuccessful()) onComplete.accept(task.isSuccessful(), msg);
                 });
     }
 
@@ -95,5 +107,11 @@ public class FirebaseAuthenticator implements Authenticator {
 
     public UserAuthenticationState getUserAuthenticationState() {
         return this.userAuthenticationState;
+    }
+
+    public void resendVerificationEmail(Consumer<Boolean> onComplete) {
+        firebaseAuth.getCurrentUser()
+                .sendEmailVerification()
+                .addOnCompleteListener(task -> onComplete.accept(task.isSuccessful()));
     }
 }
