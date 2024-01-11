@@ -3,22 +3,29 @@ package com.example.piccy.model;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthCredential;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class FirebaseAuthenticator implements Authenticator {
     private FirebaseAuth firebaseAuth;
     private StatusUpdateListener statusUpdateListener;
     private UserAuthenticationState userAuthenticationState;
+    private FirebaseAuth.AuthStateListener authStateListener;
 
     public FirebaseAuthenticator() {
         firebaseAuth = FirebaseAuth.getInstance();
@@ -31,13 +38,41 @@ public class FirebaseAuthenticator implements Authenticator {
         };
 
         userAuthenticationState = UserAuthenticationState.NONE;
-        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-        if (firebaseUser != null) {
-            userAuthenticationState = UserAuthenticationState.REGISTERED;
-            if (firebaseUser.isEmailVerified()) {
-                userAuthenticationState = UserAuthenticationState.VERIFIED;
+
+        AtomicBoolean initializing = new AtomicBoolean(true);
+
+        authStateListener = (auth)->{
+
+            FirebaseUser user = auth.getCurrentUser();
+
+            if (user != null) {
+
+                user.reload().addOnCompleteListener(Executors.newSingleThreadExecutor(), task -> {
+
+                    if (!task.isSuccessful()) return;
+
+                    if (auth.getCurrentUser() != null) {
+                        userAuthenticationState = UserAuthenticationState.REGISTERED;
+
+                        if (user.isEmailVerified()) {
+                            userAuthenticationState = UserAuthenticationState.VERIFIED;
+                        }
+
+                        initializing.set(false);
+                    } else userAuthenticationState = UserAuthenticationState.NONE;
+
+                    initializing.set(false);
+                });
+
+            } else {
+                userAuthenticationState = UserAuthenticationState.NONE;
+                initializing.set(false);
             }
-        }
+        };
+
+        firebaseAuth.addAuthStateListener(authStateListener);
+
+        while (initializing.get());
     }
 
     @Override
@@ -54,7 +89,7 @@ public class FirebaseAuthenticator implements Authenticator {
                                 .setDisplayName(name)
                                 .build();
 
-                        return firebaseAuth.getCurrentUser().updateProfile(upcr);
+                        return Objects.requireNonNull(firebaseAuth.getCurrentUser()).updateProfile(upcr);
                     } else {
                         throw new SignupException("Failed to register email");
                     }
@@ -62,7 +97,7 @@ public class FirebaseAuthenticator implements Authenticator {
 
                     if (task.isSuccessful()) {
 
-                        return firebaseAuth.getCurrentUser().sendEmailVerification();
+                        return Objects.requireNonNull(firebaseAuth.getCurrentUser()).sendEmailVerification();
                     } else if (task.getException() instanceof SignupException) {
                         throw task.getException();
                     } else {
@@ -70,7 +105,7 @@ public class FirebaseAuthenticator implements Authenticator {
                     }
                 }).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        onComplete.accept(true, null);
+                        onComplete.accept(true, "");
                     } else if (task.getException() instanceof SignupException) {
                         onComplete.accept(false, task.getException().getMessage());
                     } else {
@@ -86,32 +121,63 @@ public class FirebaseAuthenticator implements Authenticator {
                     if (task.isSuccessful()) {
                         userAuthenticationState = UserAuthenticationState.REGISTERED;
 
-                        if (firebaseAuth.getCurrentUser().isEmailVerified()) {
+                        if (Objects.requireNonNull(firebaseAuth.getCurrentUser()).isEmailVerified()) {
                             userAuthenticationState = UserAuthenticationState.VERIFIED;
                         }
                     }
 
-                    String msg = task.isSuccessful() ? "" : task.getException().getMessage();
+                    String msg = task.isSuccessful() ? "" : Objects.requireNonNull(task.getException()).getMessage();
                     if (task.isSuccessful()) onComplete.accept(task.isSuccessful(), msg);
                 });
     }
 
     @Override
     public boolean isLoggedIn() {
-        return firebaseAuth.getCurrentUser() != null;
+        return userAuthenticationState != UserAuthenticationState.NONE;
     }
 
     public void setStatusUpdateListener(StatusUpdateListener statusUpdateListener) {
         this.statusUpdateListener = statusUpdateListener;
     }
 
+    @NonNull
     public UserAuthenticationState getUserAuthenticationState() {
         return this.userAuthenticationState;
     }
 
     public void resendVerificationEmail(Consumer<Boolean> onComplete) {
-        firebaseAuth.getCurrentUser()
+        Objects.requireNonNull(firebaseAuth.getCurrentUser())
                 .sendEmailVerification()
                 .addOnCompleteListener(task -> onComplete.accept(task.isSuccessful()));
+    }
+
+    @Nullable
+    public String getEmail() {
+        if (firebaseAuth.getCurrentUser() == null) return null;
+        else return firebaseAuth.getCurrentUser().getEmail();
+    }
+
+    public void isVerified(Consumer<Boolean> callback) {
+        if (userAuthenticationState == UserAuthenticationState.NONE) {
+            callback.accept(false);
+            return;
+        }
+        if (userAuthenticationState == UserAuthenticationState.VERIFIED) {
+            callback.accept(true);
+            return;
+        }
+
+        Objects.requireNonNull(firebaseAuth.getCurrentUser()).reload().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                callback.accept(false);
+            } else {
+                callback.accept(firebaseAuth.getCurrentUser().isEmailVerified());
+            }
+        });
+    }
+
+    @Override
+    public void close() {
+        firebaseAuth.removeAuthStateListener(authStateListener);
     }
 }

@@ -12,4 +12,6 @@ public interface Authenticator {
     void logIn(@NonNull String email, @NonNull String password, @NonNull BiConsumer<Boolean, String> onComplete);
 
     boolean isLoggedIn();
+
+    void close();
 }
