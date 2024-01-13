@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Piccy" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.Piccy" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_200</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -20,13 +20,11 @@
         <item name="windowNoTitle">false</item>
     </style>
 
-    <style name="MySearchViewStyle" parent="Widget.AppCompat.Light.SearchView">
+    <style name="MySearchViewStyle" parent="Widget.Material3.SearchView">
         <item name="searchHintIcon">@null</item>
     </style>
 
     <style name="Theme.Piccy.Toolbar" parent="Theme.Piccy">
-        <item name="android:textColorSecondary">@color/white</item>
-        <item name="android:background">?attr/colorOnPrimary</item>
         <item name="searchViewStyle">@style/MySearchViewStyle</item>
     </style>
 </resources>

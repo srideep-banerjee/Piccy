@@ -6,12 +6,14 @@
         android:id="@+id/app_bar_search"
 
         android:icon="@drawable/baseline_search_24"
+        app:iconTint="?attr/colorOnSurface"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView"
         android:title="Search" />
     <item
         android:id="@+id/self_profile_icon"
         android:icon="@drawable/circle_user_regular"
+        app:iconTint="?attr/colorOnSurface"
         android:title="self_profile_icon"
         app:showAsAction="ifRoom" />
 

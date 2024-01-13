@@ -18,6 +18,7 @@ import com.example.piccy.databinding.ActivityMainBinding
 import com.example.piccy.view.profile.ProfileActivity
 import com.example.piccy.viewmodels.MainViewModel
 import com.example.piccy.viewmodels.MainScreen
+import com.google.android.material.elevation.SurfaceColors
 
 
 class MainActivity : AppCompatActivity() {
@@ -63,6 +64,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         //Setup toolbar
+        val color = SurfaceColors.SURFACE_2.getColor(this)
+        mainBinding.appBarLayout.setBackgroundColor(color)
         setSupportActionBar(mainBinding.toolbar)
 
     }
