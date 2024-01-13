@@ -31,7 +31,6 @@ class ProfileViewModel : ViewModel() {
             }
             withContext(Dispatchers.Main){
                 currentScreen.postValue(screen)
-                println("Current screen is ${screen.screenName}")
             }
         }
     }
@@ -51,6 +50,15 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             authenticator.logIn(currentEntries[0], currentEntries[1]) { successful, msg ->
                 onComplete(successful, msg)
+                when ((authenticator as FirebaseAuthenticator).userAuthenticationState) {
+                    UserAuthenticationState.NONE -> {}
+                    UserAuthenticationState.REGISTERED -> {
+                        updateScreen(ProfileScreen.VERIFICATION)
+                    }
+                    UserAuthenticationState.VERIFIED -> {
+                        updateScreen(ProfileScreen.DETAILS)
+                    }
+                }
             }
         }
     }
@@ -63,6 +71,15 @@ class ProfileViewModel : ViewModel() {
                 currentEntries[2]
             ) { successful, msg ->
                 onComplete(successful, msg)
+                when ((authenticator as FirebaseAuthenticator).userAuthenticationState) {
+                    UserAuthenticationState.NONE -> {}
+                    UserAuthenticationState.REGISTERED -> {
+                        updateScreen(ProfileScreen.VERIFICATION)
+                    }
+                    UserAuthenticationState.VERIFIED -> {
+                        updateScreen(ProfileScreen.DETAILS)
+                    }
+                }
             }
         }
     }

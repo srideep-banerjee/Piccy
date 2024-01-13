@@ -5,27 +5,22 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class FirebaseAuthenticator implements Authenticator {
-    private FirebaseAuth firebaseAuth;
+    private final FirebaseAuth firebaseAuth;
     private StatusUpdateListener statusUpdateListener;
     private UserAuthenticationState userAuthenticationState;
-    private FirebaseAuth.AuthStateListener authStateListener;
+    private final FirebaseAuth.AuthStateListener authStateListener;
 
     public FirebaseAuthenticator() {
         firebaseAuth = FirebaseAuth.getInstance();
@@ -127,7 +122,7 @@ public class FirebaseAuthenticator implements Authenticator {
                     }
 
                     String msg = task.isSuccessful() ? "" : Objects.requireNonNull(task.getException()).getMessage();
-                    if (task.isSuccessful()) onComplete.accept(task.isSuccessful(), msg);
+                    onComplete.accept(task.isSuccessful(), msg);
                 });
     }
 

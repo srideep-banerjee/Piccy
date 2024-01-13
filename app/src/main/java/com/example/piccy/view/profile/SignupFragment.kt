@@ -36,7 +36,6 @@ class SignupFragment : Fragment() {
                     Toast.makeText(this.context, msg, Toast.LENGTH_LONG).show()
                 }
                 (this.activity as ProfileActivity).hideDialog()
-                profileViewModel.updateScreen(ProfileScreen.VERIFICATION)
             }
         }
 
