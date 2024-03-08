@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -11,23 +13,26 @@ import com.example.piccy.databinding.MenuHomeBinding
 import com.example.piccy.viewmodels.HomeViewMode
 
 class HomeFragment : Fragment() {
-    private lateinit var menuHomeBinding: MenuHomeBinding
+
+    private lateinit var composeView: ComposeView
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        menuHomeBinding = MenuHomeBinding.inflate(inflater, container, false)
-        menuHomeBinding.lifecycleOwner = viewLifecycleOwner
+    ): View {
 
-        val model by viewModels<HomeViewMode>()
+        composeView = ComposeView(requireContext())
+        composeView.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+        return composeView
+    }
 
-        menuHomeBinding.viewModel = model
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        val observer = Observer<Int>{newCount ->
-            menuHomeBinding.textView.text = "Button clicked $newCount times."
+        composeView.setContent {
+            HomeScreen()
         }
-
-        model.mutableLiveData.observe(viewLifecycleOwner, observer)
-        return menuHomeBinding.root
     }
 }
