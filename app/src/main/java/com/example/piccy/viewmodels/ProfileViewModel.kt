@@ -15,6 +15,7 @@ class ProfileViewModel : ViewModel() {
     private val authenticator: Authenticator by lazy {
         FirebaseAuthenticator()
     }
+    var loading = MutableLiveData(true)
 
     var currentScreen: MutableLiveData<ProfileScreen> = MutableLiveData(ProfileScreen.ANONYMOUS)
         private set
@@ -31,6 +32,7 @@ class ProfileViewModel : ViewModel() {
             }
             withContext(Dispatchers.Main){
                 currentScreen.postValue(screen)
+                loading.postValue(false)
             }
         }
     }
@@ -100,6 +102,10 @@ class ProfileViewModel : ViewModel() {
         return (authenticator as FirebaseAuthenticator).isVerified{
             onComplete(it)
         }
+    }
+
+    fun getUsername(): String? {
+        return (authenticator as FirebaseAuthenticator).userName
     }
 
     override fun onCleared() {

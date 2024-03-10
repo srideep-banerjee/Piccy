@@ -65,6 +65,16 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         profileViewModel.currentScreen.observe(this, currentScreenObserver)
+
+        val loadingObserver: Observer<Boolean> = Observer { loading ->
+            if (loading) {
+                profileBinding.loadingScreen.visibility = View.VISIBLE
+            } else {
+                profileBinding.loadingScreen.visibility = View.GONE
+            }
+        }
+
+        profileViewModel.loading.observe(this, loadingObserver)
     }
 
     private fun getFragmentInstanceByType(screen: ProfileScreen): Fragment {
