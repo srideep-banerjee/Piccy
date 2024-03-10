@@ -152,6 +152,11 @@ public class FirebaseAuthenticator implements Authenticator {
         else return firebaseAuth.getCurrentUser().getEmail();
     }
 
+    public String getUserName() {
+        if (firebaseAuth.getCurrentUser() == null) return null;
+        else return firebaseAuth.getCurrentUser().getDisplayName();
+    }
+
     public void isVerified(Consumer<Boolean> callback) {
         if (userAuthenticationState == UserAuthenticationState.NONE) {
             callback.accept(false);
