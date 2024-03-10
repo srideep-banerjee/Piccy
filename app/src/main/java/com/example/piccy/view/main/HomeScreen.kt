@@ -121,14 +121,6 @@ fun LazyItemScope.HomeScreenItem(postShortened: PostShortened, columnHeight: Mut
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(Modifier.height(8.dp))
-//        Text(
-//            text = postShortened.title,
-//            style = MaterialTheme.typography.titleSmall,
-//            onTextLayout = {
-//                it.getLineEnd(0)
-//                "".dropLast(3).dropLastWhile { true }
-//            }
-//        )
         ReadMoreText(text = postShortened.title)
         Spacer(modifier = Modifier.height(8.dp))
         Image(
