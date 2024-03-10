@@ -1,4 +1,4 @@
-package com.example.piccy.model;
+package com.example.piccy.model.auth;
 
 public abstract class StatusUpdateListener {
     private String currentStatus = "";

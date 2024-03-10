@@ -3,9 +3,9 @@ package com.example.piccy.viewmodels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.piccy.model.Authenticator
-import com.example.piccy.model.FirebaseAuthenticator
-import com.example.piccy.model.UserAuthenticationState
+import com.example.piccy.model.auth.Authenticator
+import com.example.piccy.model.auth.FirebaseAuthenticator
+import com.example.piccy.model.auth.UserAuthenticationState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

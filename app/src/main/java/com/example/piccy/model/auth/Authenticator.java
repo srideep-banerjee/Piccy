@@ -1,4 +1,4 @@
-package com.example.piccy.model;
+package com.example.piccy.model.auth;
 
 import androidx.annotation.NonNull;
 

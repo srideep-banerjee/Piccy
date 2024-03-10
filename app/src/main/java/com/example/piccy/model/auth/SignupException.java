@@ -1,4 +1,4 @@
-package com.example.piccy.model;
+package com.example.piccy.model.auth;
 
 public class SignupException extends RuntimeException{
     public SignupException(String s) {
