@@ -126,37 +126,37 @@ public class FirebaseAuthenticator implements Authenticator {
                 });
     }
 
-    @Override
-    public boolean isLoggedIn() {
-        return userAuthenticationState != UserAuthenticationState.NONE;
-    }
-
     public void setStatusUpdateListener(StatusUpdateListener statusUpdateListener) {
         this.statusUpdateListener = statusUpdateListener;
     }
 
+    @Override
     @NonNull
     public UserAuthenticationState getUserAuthenticationState() {
         return this.userAuthenticationState;
     }
 
+    @Override
     public void resendVerificationEmail(Consumer<Boolean> onComplete) {
         Objects.requireNonNull(firebaseAuth.getCurrentUser())
                 .sendEmailVerification()
                 .addOnCompleteListener(task -> onComplete.accept(task.isSuccessful()));
     }
 
+    @Override
     @Nullable
     public String getEmail() {
         if (firebaseAuth.getCurrentUser() == null) return null;
         else return firebaseAuth.getCurrentUser().getEmail();
     }
 
+    @Override
     public String getUserName() {
         if (firebaseAuth.getCurrentUser() == null) return null;
         else return firebaseAuth.getCurrentUser().getDisplayName();
     }
 
+    @Override
     public void isVerified(Consumer<Boolean> callback) {
         if (userAuthenticationState == UserAuthenticationState.NONE) {
             callback.accept(false);

@@ -25,7 +25,7 @@ class ProfileViewModel : ViewModel() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            val screen = when ((authenticator as FirebaseAuthenticator).userAuthenticationState) {
+            val screen = when (authenticator.userAuthenticationState) {
                 UserAuthenticationState.NONE -> ProfileScreen.ANONYMOUS
                 UserAuthenticationState.REGISTERED -> ProfileScreen.VERIFICATION
                 UserAuthenticationState.VERIFIED -> ProfileScreen.DETAILS
@@ -52,7 +52,7 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             authenticator.logIn(currentEntries[0], currentEntries[1]) { successful, msg ->
                 onComplete(successful, msg)
-                when ((authenticator as FirebaseAuthenticator).userAuthenticationState) {
+                when (authenticator.userAuthenticationState) {
                     UserAuthenticationState.NONE -> {}
                     UserAuthenticationState.REGISTERED -> {
                         updateScreen(ProfileScreen.VERIFICATION)
@@ -73,7 +73,7 @@ class ProfileViewModel : ViewModel() {
                 currentEntries[2]
             ) { successful, msg ->
                 onComplete(successful, msg)
-                when ((authenticator as FirebaseAuthenticator).userAuthenticationState) {
+                when (authenticator.userAuthenticationState) {
                     UserAuthenticationState.NONE -> {}
                     UserAuthenticationState.REGISTERED -> {
                         updateScreen(ProfileScreen.VERIFICATION)
@@ -87,25 +87,23 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun resendVerificationEmail(onComplete: (Boolean) -> Unit) {
-        if (authenticator is FirebaseAuthenticator) {
-            (authenticator as FirebaseAuthenticator).resendVerificationEmail {
-                onComplete(it)
-            }
-        } else onComplete(false)
+        authenticator.resendVerificationEmail {
+            onComplete(it)
+        }
     }
 
     fun getEmail(): String? {
-        return (authenticator as FirebaseAuthenticator).email
+        return authenticator.email
     }
 
     fun isEmailVerified(onComplete: (Boolean) -> Unit) {
-        return (authenticator as FirebaseAuthenticator).isVerified{
+        return authenticator.isVerified{
             onComplete(it)
         }
     }
 
     fun getUsername(): String? {
-        return (authenticator as FirebaseAuthenticator).userName
+        return authenticator.userName
     }
 
     override fun onCleared() {

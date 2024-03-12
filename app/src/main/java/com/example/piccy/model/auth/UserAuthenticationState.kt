@@ -1,5 +1,7 @@
 package com.example.piccy.model.auth
 
+import androidx.annotation.NonNull
+
 enum class UserAuthenticationState {
-    NONE, REGISTERED, VERIFIED
+    @NonNull NONE, @NonNull REGISTERED, @NonNull VERIFIED
 }
