@@ -22,5 +22,7 @@ public interface Authenticator {
 
     String getUserName();
 
+    String getUid();
+
     void close();
 }

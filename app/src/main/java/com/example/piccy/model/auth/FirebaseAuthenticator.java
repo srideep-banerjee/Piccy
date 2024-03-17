@@ -176,6 +176,14 @@ public class FirebaseAuthenticator implements Authenticator {
         });
     }
 
+    public String getUid() {
+        if (userAuthenticationState != UserAuthenticationState.VERIFIED) {
+            return null;
+        } else {
+            return Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
+        }
+    }
+
     @Override
     public void close() {
         firebaseAuth.removeAuthStateListener(authStateListener);
