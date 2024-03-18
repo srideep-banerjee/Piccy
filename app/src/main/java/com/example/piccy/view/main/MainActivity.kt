@@ -15,6 +15,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.piccy.R
 import com.example.piccy.databinding.ActivityMainBinding
+import com.example.piccy.model.auth.Authenticator
+import com.example.piccy.model.auth.UserAuthenticationState
 import com.example.piccy.view.profile.ProfileActivity
 import com.example.piccy.viewmodels.MainViewModel
 import com.example.piccy.viewmodels.MainScreen
@@ -133,44 +135,4 @@ class MainActivity : AppCompatActivity() {
 
         return super.onCreateOptionsMenu(menu)
     }
-
-
-//    val PICK_IMAGE = 1
-//    lateinit var f:File
-//
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        if (requestCode == PICK_IMAGE) {
-//            data?.let {
-//                val uri=it.data
-//                val iv=findViewById<ImageView>(R.id.imageView)
-//                iv.setImageURI(uri)
-//                val originalFile=File(getPath(uri))
-//                println("hahahahahahahahahahahahahahahahaha old"+originalFile.length()/1024)
-//                val iv2=findViewById<ImageView>(R.id.imageView2)
-//                lifecycleScope.launch{
-//                    Compressor.compress(this@MainActivity,originalFile, Dispatchers.IO){
-//                        default()
-//                        destination(f)
-//                        size(256*1024)
-//                    }
-//                    println("hahahahahahahahahahahahahahahahaha new"+f.length()/1024)
-//                    withContext(Dispatchers.Main){
-//                        iv2.setImageBitmap(BitmapFactory.decodeFile(f.path))
-//                    }
-//                }
-//            }
-//
-//        }
-//    }
-//
-//    fun getPath(uri: Uri?): String? {
-//        val projection = arrayOf(MediaStore.Images.Media.DATA)
-//        val cursor = contentResolver.query(uri!!, projection, null, null, null)
-//        val column_index = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-//        cursor.moveToFirst()
-//        val path=cursor.getString(column_index)
-//        cursor.close()
-//        return path
-//    }
 }
