@@ -2,18 +2,22 @@ package com.example.piccy.model.db
 
 import com.example.piccy.model.auth.Authenticator
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 
 class FirebaseDbHelper(private val authenticator: Authenticator): DbHelper{
-    val firestoreDb = Firebase.firestore
+    private val firestoreDb = Firebase.firestore
+    private var userDetails: DocumentSnapshot? = null
+
     override fun checkUserAccountExists(onResult: (Boolean) -> Unit) {
-        firestoreDb
-            .collection("users")
-            .document(authenticator.uid)
-            .get()
-            .addOnCompleteListener {task ->
-                onResult(task.isSuccessful && task.result?.exists()?:false)
-            }
+        if (userDetails?.exists() == true) {
+            onResult(true)
+            return
+        }
+
+        fetchUserDetails {
+            onResult(userDetails?.exists()?:false)
+        }
     }
 
     override fun createUserAccount(onComplete: (Boolean) -> Unit) {
@@ -27,6 +31,34 @@ class FirebaseDbHelper(private val authenticator: Authenticator): DbHelper{
             .addOnCompleteListener {
                 onComplete(it.isSuccessful)
             }
+    }
+
+    override fun getPfpId(onComplete: (String?) -> Unit) {
+        if (userDetails?.exists() == true) {
+            onComplete(userDetails!!.getString("pfp"))
+            return
+        }
+
+        fetchUserDetails {
+            onComplete(userDetails?.getString("pfp"))
+        }
+    }
+
+    private fun fetchUserDetails(onComplete: () -> Unit = {}) {
+        firestoreDb
+            .collection("users")
+            .document(authenticator.uid)
+            .get()
+            .addOnCompleteListener {task ->
+                if (task.isSuccessful) {
+                    userDetails = task.result
+                }
+                onComplete()
+            }
+    }
+
+    override fun refresh() {
+        fetchUserDetails()
     }
 
 }
