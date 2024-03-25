@@ -16,6 +16,12 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+
+        buildConfigField("boolean", "USE_EMULATOR", "${properties.getProperty("USE_EMULATOR")}")
+        buildConfigField("String", "EMULATOR_IP", "\"${properties.getProperty("EMULATOR_IP")}\"")
     }
 
     buildTypes {
@@ -29,6 +35,7 @@ android {
         viewBinding true
         //noinspection DataBindingWithoutKapt
         dataBinding true
+        buildConfig true
         compose true
     }
 
