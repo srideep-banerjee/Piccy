@@ -81,4 +81,9 @@ class MainViewModel: ViewModel() {
             }
         }
     }
+
+    override fun onCleared() {
+        authenticator.close()
+        super.onCleared()
+    }
 }
