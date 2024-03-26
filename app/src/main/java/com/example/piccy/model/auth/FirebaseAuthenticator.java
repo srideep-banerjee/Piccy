@@ -176,7 +176,12 @@ public class FirebaseAuthenticator implements Authenticator {
             if (!task.isSuccessful()) {
                 callback.accept(false);
             } else {
-                callback.accept(firebaseAuth.getCurrentUser().isEmailVerified());
+                if (firebaseAuth.getCurrentUser().isEmailVerified()) {
+                    userAuthenticationState = UserAuthenticationState.VERIFIED;
+                    callback.accept(true);
+                } else {
+                    callback.accept(false);
+                }
             }
         });
     }

@@ -1,6 +1,5 @@
 package com.example.piccy.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,23 +36,28 @@ class MainViewModel: ViewModel() {
     init {
         viewModelScope.launch(Dispatchers.IO) {
             authenticator.checkAuthState(
-                {userAuthenticationState->
-                    if (userAuthenticationState == UserAuthenticationState.VERIFIED) {
-                        dbHelper.checkUserAccountExists { accountExists ->
-                            if (accountExists) {
-                                dbHelper.getPfpId {
-                                    pfp.postValue(it ?: "")
-                                }
-                            } else {
-                                dbHelper.createUserAccount {}
-                            }
-                        }
-                    }
+                {
+                    userAuthenticationState = it
+                    performAccountOperations()
                 },
                 {
                     toast.postValue(it ?: "")
                 }
             )
+        }
+    }
+
+    private fun performAccountOperations() {
+        if (userAuthenticationState == UserAuthenticationState.VERIFIED) {
+            dbHelper.checkUserAccountExists { accountExists ->
+                if (accountExists) {
+                    dbHelper.getPfpId {
+                        pfp.postValue(it ?: "")
+                    }
+                } else {
+                    dbHelper.createUserAccount {}
+                }
+            }
         }
     }
 
@@ -67,5 +71,14 @@ class MainViewModel: ViewModel() {
 
     fun updateSearchQueryText(text: String) {
         searchQueryText.value = text
+    }
+
+    fun updateIsEmailVerified() {
+        authenticator.isVerified {
+            if (it) {
+                userAuthenticationState = UserAuthenticationState.VERIFIED
+                performAccountOperations()
+            }
+        }
     }
 }

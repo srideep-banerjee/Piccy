@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -15,11 +18,9 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.piccy.R
 import com.example.piccy.databinding.ActivityMainBinding
-import com.example.piccy.model.auth.Authenticator
-import com.example.piccy.model.auth.UserAuthenticationState
 import com.example.piccy.view.profile.ProfileActivity
-import com.example.piccy.viewmodels.MainViewModel
 import com.example.piccy.viewmodels.MainScreen
+import com.example.piccy.viewmodels.MainViewModel
 import com.google.android.material.elevation.SurfaceColors
 
 
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainBinding: ActivityMainBinding
     private lateinit var mainViewModel: MainViewModel
     private lateinit var searchViewExpansionObserver: Observer<Boolean>
+    private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +72,12 @@ class MainActivity : AppCompatActivity() {
         mainBinding.appBarLayout.setBackgroundColor(color)
         setSupportActionBar(mainBinding.toolbar)
 
+        //Registering for activity result
+        activityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { _ ->
+            mainViewModel.updateIsEmailVerified()
+        }
     }
 
     //Under changes
@@ -129,7 +137,7 @@ class MainActivity : AppCompatActivity() {
 
         profileIcon?.setOnMenuItemClickListener {
             val intent = Intent(this@MainActivity, ProfileActivity::class.java)
-            startActivity(intent)
+            activityResultLauncher.launch(intent)
             return@setOnMenuItemClickListener true
         }
 
