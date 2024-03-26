@@ -10,6 +10,8 @@ public interface Authenticator {
     @NonNull
     UserAuthenticationState getUserAuthenticationState();
 
+    void checkAuthState( @NonNull Consumer<UserAuthenticationState> onComplete, @NonNull Consumer<String> onError);
+
     void signUp(@NonNull String email, @NonNull String name, @NonNull String password, @NonNull BiConsumer<Boolean, String> onComplete);
 
     void logIn(@NonNull String email, @NonNull String password, @NonNull BiConsumer<Boolean, String> onComplete);

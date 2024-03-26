@@ -25,15 +25,23 @@ class ProfileViewModel : ViewModel() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            val screen = when (authenticator.userAuthenticationState) {
-                UserAuthenticationState.NONE -> ProfileScreen.ANONYMOUS
-                UserAuthenticationState.REGISTERED -> ProfileScreen.VERIFICATION
-                UserAuthenticationState.VERIFIED -> ProfileScreen.DETAILS
-            }
-            withContext(Dispatchers.Main){
-                currentScreen.postValue(screen)
-                loading.postValue(false)
-            }
+            authenticator.checkAuthState(
+                {
+                    val screen = when (authenticator.userAuthenticationState) {
+                        UserAuthenticationState.NONE -> ProfileScreen.ANONYMOUS
+                        UserAuthenticationState.REGISTERED -> ProfileScreen.VERIFICATION
+                        UserAuthenticationState.VERIFIED -> ProfileScreen.DETAILS
+                    }
+                    viewModelScope.launch(Dispatchers.Main) {
+                        currentScreen.postValue(screen)
+                        loading.postValue(false)
+                    }
+                },
+                {
+
+                }
+            )
+
         }
     }
 

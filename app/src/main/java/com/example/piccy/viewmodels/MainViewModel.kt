@@ -1,5 +1,6 @@
 package com.example.piccy.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,6 +27,8 @@ class MainViewModel: ViewModel() {
         private set
     var searchQueryText: MutableLiveData<String> = MutableLiveData("")
         private set
+    var toast: MutableLiveData<String> = MutableLiveData("")
+        private set
 
     //null -> user account non existent, "" -> user account exists without pfp, "pfpid"
     var pfp: MutableLiveData<String?> = MutableLiveData(null)
@@ -33,17 +36,24 @@ class MainViewModel: ViewModel() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            userAuthenticationState = authenticator.userAuthenticationState
-        }
-
-        dbHelper.checkUserAccountExists { accountExists ->
-            if (accountExists) {
-                dbHelper.getPfpId {
-                    pfp.postValue(it?:"")
+            authenticator.checkAuthState(
+                {userAuthenticationState->
+                    if (userAuthenticationState == UserAuthenticationState.VERIFIED) {
+                        dbHelper.checkUserAccountExists { accountExists ->
+                            if (accountExists) {
+                                dbHelper.getPfpId {
+                                    pfp.postValue(it ?: "")
+                                }
+                            } else {
+                                dbHelper.createUserAccount {}
+                            }
+                        }
+                    }
+                },
+                {
+                    toast.postValue(it ?: "")
                 }
-            } else {
-                dbHelper.createUserAccount {}
-            }
+            )
         }
     }
 

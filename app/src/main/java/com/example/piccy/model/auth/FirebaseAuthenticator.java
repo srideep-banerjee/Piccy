@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,13 +19,13 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FirebaseAuthenticator implements Authenticator {
-    private final FirebaseAuth firebaseAuth;
+    private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private StatusUpdateListener statusUpdateListener;
-    private UserAuthenticationState userAuthenticationState;
-    private final FirebaseAuth.AuthStateListener authStateListener;
+    private UserAuthenticationState userAuthenticationState = UserAuthenticationState.NONE;
+    private final ArrayList<FirebaseAuth.AuthStateListener> authStateListeners = new ArrayList<>();
 
     public FirebaseAuthenticator() {
-        firebaseAuth = FirebaseAuth.getInstance();
+
         if (BuildConfig.USE_EMULATOR) {
             firebaseAuth.useEmulator(BuildConfig.EMULATOR_IP, 9099);
         }
@@ -35,12 +36,11 @@ public class FirebaseAuthenticator implements Authenticator {
                 Log.i("FIREBASE_AUTH", newStatus);
             }
         };
+    }
 
-        userAuthenticationState = UserAuthenticationState.NONE;
-
-        AtomicBoolean initializing = new AtomicBoolean(true);
-
-        authStateListener = (auth)->{
+    @Override
+    public void checkAuthState(@NonNull Consumer<UserAuthenticationState> onComplete, @NonNull Consumer<String> onError) {
+        FirebaseAuth.AuthStateListener authStateListener = (auth) -> {
 
             FirebaseUser user = auth.getCurrentUser();
 
@@ -48,30 +48,31 @@ public class FirebaseAuthenticator implements Authenticator {
 
                 user.reload().addOnCompleteListener(Executors.newSingleThreadExecutor(), task -> {
 
-                    if (!task.isSuccessful()) return;
+                    if (!task.isSuccessful()) {
+                        onError.accept("Unable to load authentication state");
+                        firebaseAuth.signOut();
+                        return;
+                    }
 
-                    if (auth.getCurrentUser() != null) {
+                    if (auth.getCurrentUser() == null) {
+                        userAuthenticationState = UserAuthenticationState.NONE;
+                    } else if (auth.getCurrentUser().isEmailVerified()) {
+                        userAuthenticationState = UserAuthenticationState.VERIFIED;
+                    } else {
                         userAuthenticationState = UserAuthenticationState.REGISTERED;
+                    }
 
-                        if (user.isEmailVerified()) {
-                            userAuthenticationState = UserAuthenticationState.VERIFIED;
-                        }
-
-                        initializing.set(false);
-                    } else userAuthenticationState = UserAuthenticationState.NONE;
-
-                    initializing.set(false);
+                    onComplete.accept(userAuthenticationState);
                 });
 
             } else {
                 userAuthenticationState = UserAuthenticationState.NONE;
-                initializing.set(false);
+                onComplete.accept(userAuthenticationState);
             }
         };
 
         firebaseAuth.addAuthStateListener(authStateListener);
-
-        while (initializing.get());
+        authStateListeners.add(authStateListener);
     }
 
     @Override
@@ -114,7 +115,7 @@ public class FirebaseAuthenticator implements Authenticator {
     }
 
     @Override
-    public void logIn(@NonNull String email, @NonNull String password, @NonNull BiConsumer<Boolean,String> onComplete) {
+    public void logIn(@NonNull String email, @NonNull String password, @NonNull BiConsumer<Boolean, String> onComplete) {
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -190,6 +191,8 @@ public class FirebaseAuthenticator implements Authenticator {
 
     @Override
     public void close() {
-        firebaseAuth.removeAuthStateListener(authStateListener);
+        for (var authStateListener : authStateListeners) {
+            firebaseAuth.removeAuthStateListener(authStateListener);
+        }
     }
 }
