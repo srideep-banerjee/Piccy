@@ -4,6 +4,7 @@ import com.example.piccy.BuildConfig
 import com.example.piccy.model.auth.Authenticator
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 
 class FirebaseDbHelper(private val authenticator: Authenticator): DbHelper{
@@ -11,8 +12,12 @@ class FirebaseDbHelper(private val authenticator: Authenticator): DbHelper{
     private var userDetails: DocumentSnapshot? = null
 
     init {
-        if (BuildConfig.USE_EMULATOR) {
-            firestoreDb.useEmulator(BuildConfig.EMULATOR_IP,8080)
+        try {
+            if (BuildConfig.USE_EMULATOR) {
+                firestoreDb.useEmulator(BuildConfig.EMULATOR_IP, 8080)
+            }
+        } catch (err: Exception) {
+            err.printStackTrace()
         }
     }
 
@@ -34,8 +39,11 @@ class FirebaseDbHelper(private val authenticator: Authenticator): DbHelper{
         firestoreDb
             .collection("users")
             .document(authenticator.uid)
-            .set(user)
+            .set(user, SetOptions.merge())
             .addOnCompleteListener {
+                if (!it.isSuccessful){
+                    it.exception?.printStackTrace()
+                }
                 onComplete(it.isSuccessful)
             }
     }

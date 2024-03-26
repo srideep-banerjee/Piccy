@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -17,6 +18,7 @@ import com.example.piccy.viewmodels.ProfileScreen
 import com.example.piccy.viewmodels.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Arrays
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -75,6 +77,13 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         profileViewModel.loading.observe(this, loadingObserver)
+
+        val toastObserver: Observer<String> = Observer {toast ->
+            if (toast != "")
+                Toast.makeText(this, toast, Toast.LENGTH_LONG).show()
+        }
+
+        profileViewModel.toast.observe(this, toastObserver)
     }
 
     private fun getFragmentInstanceByType(screen: ProfileScreen): Fragment {

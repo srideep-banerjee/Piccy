@@ -23,6 +23,8 @@ class ProfileViewModel : ViewModel() {
     var currentEntries = mutableListOf("", "", "")
         private set
 
+    val toast: MutableLiveData<String> = MutableLiveData("")
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
             authenticator.checkAuthState(
@@ -38,7 +40,8 @@ class ProfileViewModel : ViewModel() {
                     }
                 },
                 {
-
+                    loading.postValue(false)
+                    toast.postValue(it ?: "null")
                 }
             )
 

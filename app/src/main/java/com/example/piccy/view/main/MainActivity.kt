@@ -5,13 +5,14 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.activity.result.ActivityResult
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -22,6 +23,8 @@ import com.example.piccy.view.profile.ProfileActivity
 import com.example.piccy.viewmodels.MainScreen
 import com.example.piccy.viewmodels.MainViewModel
 import com.google.android.material.elevation.SurfaceColors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
@@ -78,6 +81,15 @@ class MainActivity : AppCompatActivity() {
         ) { _ ->
             mainViewModel.updateIsEmailVerified()
         }
+
+        //Toast observer
+        val toastObserver = Observer<String> {
+            lifecycleScope.launch(Dispatchers.Main) {
+                if (it != "")
+                    Toast.makeText(this@MainActivity, it, Toast.LENGTH_LONG).show()
+            }
+        }
+        mainViewModel.toast.observe(this, toastObserver)
     }
 
     //Under changes

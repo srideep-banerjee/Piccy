@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,7 +50,8 @@ public class FirebaseAuthenticator implements Authenticator {
                 user.reload().addOnCompleteListener(Executors.newSingleThreadExecutor(), task -> {
 
                     if (!task.isSuccessful()) {
-                        onError.accept("Unable to load authentication state");
+                        Objects.requireNonNull(task.getException()).printStackTrace();
+                        onError.accept(task.getException().toString());
                         firebaseAuth.signOut();
                         return;
                     }
