@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.piccy.BuildConfig;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,6 +25,9 @@ public class FirebaseAuthenticator implements Authenticator {
 
     public FirebaseAuthenticator() {
         firebaseAuth = FirebaseAuth.getInstance();
+        if (BuildConfig.USE_EMULATOR) {
+            firebaseAuth.useEmulator(BuildConfig.EMULATOR_IP, 9099);
+        }
 
         statusUpdateListener = new StatusUpdateListener() {
             @Override

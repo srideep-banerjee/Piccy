@@ -1,5 +1,6 @@
 package com.example.piccy.model.db
 
+import com.example.piccy.BuildConfig
 import com.example.piccy.model.auth.Authenticator
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentSnapshot
@@ -8,6 +9,12 @@ import com.google.firebase.firestore.firestore
 class FirebaseDbHelper(private val authenticator: Authenticator): DbHelper{
     private val firestoreDb = Firebase.firestore
     private var userDetails: DocumentSnapshot? = null
+
+    init {
+        if (BuildConfig.USE_EMULATOR) {
+            firestoreDb.useEmulator(BuildConfig.EMULATOR_IP,8080)
+        }
+    }
 
     override fun checkUserAccountExists(onResult: (Boolean) -> Unit) {
         if (userDetails?.exists() == true) {
