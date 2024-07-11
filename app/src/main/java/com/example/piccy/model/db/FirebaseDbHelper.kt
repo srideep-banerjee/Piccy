@@ -4,6 +4,7 @@ import com.example.piccy.BuildConfig
 import com.example.piccy.model.auth.Authenticator
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 

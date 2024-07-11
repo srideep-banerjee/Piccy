@@ -1,5 +1,6 @@
 package com.example.piccy.viewmodels
 
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +16,7 @@ class ProfileViewModel : ViewModel() {
     private val authenticator: Authenticator by lazy {
         FirebaseAuthenticator()
     }
-    var loading = MutableLiveData(true)
+    val loading = MutableLiveData(true)
 
     var currentScreen: MutableLiveData<ProfileScreen> = MutableLiveData(ProfileScreen.ANONYMOUS)
         private set
@@ -24,6 +25,8 @@ class ProfileViewModel : ViewModel() {
         private set
 
     val toast: MutableLiveData<String> = MutableLiveData("")
+
+    val pfp: MutableLiveData<Uri?> = MutableLiveData(null)
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -115,6 +118,10 @@ class ProfileViewModel : ViewModel() {
 
     fun getUsername(): String? {
         return authenticator.userName
+    }
+
+    fun setPfp(pfp: Uri?) {
+        this.pfp.postValue(pfp)
     }
 
     override fun onCleared() {

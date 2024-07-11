@@ -1,23 +1,44 @@
 package com.example.piccy.view.profile
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.ImageDecoder
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.canhub.cropper.CropImage
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
+import com.example.piccy.Constants.cropImageOutputName
 import com.example.piccy.R
 import com.example.piccy.databinding.ActivityProfileBinding
+import com.example.piccy.view.ImageUtil
 import com.example.piccy.viewmodels.ProfileScreen
 import com.example.piccy.viewmodels.ProfileViewModel
+import id.zelory.compressor.Compressor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Arrays
 
 class ProfileActivity : AppCompatActivity() {
@@ -30,7 +51,9 @@ class ProfileActivity : AppCompatActivity() {
     private val verificationFragment: VerificationFragment by lazy { VerificationFragment() }
     private lateinit var dialog: AlertDialog
     private lateinit var customAlertTitle: View
+    private lateinit var cropImage: ActivityResultLauncher<CropImageContractOptions>
 
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -51,19 +74,87 @@ class ProfileActivity : AppCompatActivity() {
 
         val profileViewModel by viewModels<ProfileViewModel>()
 
-        switchScreenTo(profileViewModel.currentScreen.value?:ProfileScreen.ANONYMOUS)
+        switchScreenTo(profileViewModel.currentScreen.value ?: ProfileScreen.ANONYMOUS)
 
         onBackPressedDispatcher.addCallback {
             when (profileViewModel.currentScreen.value) {
                 ProfileScreen.VERIFICATION,
                 ProfileScreen.DETAILS,
                 ProfileScreen.ANONYMOUS -> finish()
+
                 else -> profileViewModel.updateScreen(ProfileScreen.ANONYMOUS)
             }
         }
 
+        cropImage = registerForActivityResult(CropImageContract()) { result ->
+            if (result.isSuccessful) {
+                this@ProfileActivity.lifecycleScope.launch(Dispatchers.IO) {
+                    result
+                        .getBitmap(this@ProfileActivity)
+                        ?.copy(Bitmap.Config.ARGB_8888, true)
+                        ?.let {bitmap ->
+
+                            result.uriContent?.path?.let { path ->
+                                val croppedImgFile = File(
+                                    path.replace(
+                                        "my_images",
+                                        getExternalFilesDir(null)?.path ?: "/",
+                                        true
+                                    )
+                                )
+                                val circularBitmap = ImageUtil.circleBitmap(bitmap)
+                                croppedImgFile.outputStream().use {
+                                    circularBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                                }
+                            }
+
+                            result.originalUri?.path?.let { path ->
+                                File(
+                                    path.replace(
+                                        "cached_files",
+                                        cacheDir.path,
+                                        true
+                                    )
+                                ).delete()
+                            }
+
+                            withContext(Dispatchers.Main) {
+                                profileBinding.imageView.setImageURI(result.uriContent)
+                                profileBinding.imageView.setColorFilter(Color.TRANSPARENT)
+                            }
+                            profileViewModel.pfp.postValue(result.uriContent)
+                        }
+                }
+            } else {
+                profileViewModel.toast.postValue(result.error?.message)
+            }
+        }
+
+        profileBinding.floatingActionButton.setOnClickListener {
+            cropImage.launch(
+                CropImageContractOptions(
+                    uri = null,
+                    CropImageOptions(
+                        imageSourceIncludeGallery = true,
+                        imageSourceIncludeCamera = true,
+                        cropShape = CropImageView.CropShape.OVAL,
+                        aspectRatioX = 1,
+                        aspectRatioY = 1,
+                        fixAspectRatio = true,
+                        customOutputUri = File(cacheDir, cropImageOutputName).toUri()
+                    )
+                )
+            )
+        }
+
+
         val currentScreenObserver: Observer<ProfileScreen> = Observer {
             switchScreenTo(it)
+            if (it == ProfileScreen.DETAILS) {
+                profileBinding.floatingActionButton.show()
+            } else {
+                profileBinding.floatingActionButton.hide()
+            }
         }
 
         profileViewModel.currentScreen.observe(this, currentScreenObserver)
@@ -78,7 +169,7 @@ class ProfileActivity : AppCompatActivity() {
 
         profileViewModel.loading.observe(this, loadingObserver)
 
-        val toastObserver: Observer<String> = Observer {toast ->
+        val toastObserver: Observer<String> = Observer { toast ->
             if (toast != "")
                 Toast.makeText(this, toast, Toast.LENGTH_LONG).show()
         }
@@ -87,7 +178,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun getFragmentInstanceByType(screen: ProfileScreen): Fragment {
-        return when(screen) {
+        return when (screen) {
             ProfileScreen.ANONYMOUS -> anonymousFragment
             ProfileScreen.LOGIN -> loginFragment
             ProfileScreen.SIGNUP -> signupFragment
@@ -103,14 +194,6 @@ class ProfileActivity : AppCompatActivity() {
         val fragment = getFragmentInstanceByType(screen)
 
         fragmentTransaction.replace(profileBinding.fragmentContainerView2.id, fragment)
-
-//        if(screen == ProfileScreen.ANONYMOUS) {
-//            fragmentTransaction.replace(profileBinding.fragmentContainerView2.id, fragment)
-//        } else {
-//            fragmentManager.popBackStack()
-//            fragmentTransaction.addToBackStack(screen.screenName)
-//            fragmentTransaction.replace(profileBinding.fragmentContainerView2.id, fragment)
-//        }
 
         fragmentTransaction.commit()
     }

@@ -1,8 +1,17 @@
 package com.example.piccy.view.main
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -10,21 +19,31 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SearchView
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import coil.ImageLoader
+import coil.disk.DiskCache
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.example.piccy.R
 import com.example.piccy.databinding.ActivityMainBinding
+import com.example.piccy.view.ImageUtil
 import com.example.piccy.view.profile.ProfileActivity
 import com.example.piccy.viewmodels.MainScreen
 import com.example.piccy.viewmodels.MainViewModel
 import com.google.android.material.elevation.SurfaceColors
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : AppCompatActivity() {
@@ -152,6 +171,40 @@ class MainActivity : AppCompatActivity() {
             activityResultLauncher.launch(intent)
             return@setOnMenuItemClickListener true
         }
+
+        val theme = this.theme
+        val typedValue = TypedValue()
+        theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
+        profileIcon?.icon?.setTint(typedValue.data)
+
+        val pfpObserver: Observer<String?> = Observer {pfp ->
+            if (pfp == null || pfp == "") {
+                profileIcon?.setIcon(R.drawable.user_circle_cutout)
+                profileIcon?.icon?.setTint(typedValue.data)
+            } else {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val loader = ImageLoader.Builder(this@MainActivity)
+                        .memoryCachePolicy(CachePolicy.DISABLED)
+                        .diskCachePolicy(CachePolicy.DISABLED)
+                        .build()
+                    val request = ImageRequest.Builder(this@MainActivity)
+                        .data(pfp)
+                        .target(onSuccess = {result ->
+                            val inputBitmap = (result as BitmapDrawable).bitmap
+                            val circleImage = ImageUtil.circleBitmap(inputBitmap)
+                            runOnUiThread {
+                                profileIcon?.icon = BitmapDrawable(resources, circleImage)
+                            }
+                        })
+                        .allowHardware(false)
+                        .build()
+
+                    loader.execute(request)
+                }
+            }
+        }
+
+        mainViewModel.pfp.observe(this, pfpObserver)
 
         return super.onCreateOptionsMenu(menu)
     }
