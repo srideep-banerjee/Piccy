@@ -1,5 +1,6 @@
 package com.example.piccy.view.profile
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,11 +9,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import com.example.piccy.databinding.FragmentLoginBinding
-import com.example.piccy.view.Util.Companion.addListener
+import com.example.piccy.view.Util.Companion.setTextListener
 import com.example.piccy.viewmodels.ProfileScreen
 import com.example.piccy.viewmodels.ProfileViewModel
 
 class LoginFragment : Fragment() {
+
+    private var currentActivity: ProfileActivity? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,23 +31,37 @@ class LoginFragment : Fragment() {
 
         loginFragmentBinding.loginButton.setOnClickListener {
 
-            (this.activity as ProfileActivity).showDialog("Logging in")
+            currentActivity?.showDialog("Logging in")
 
             profileViewModel.login { success, msg ->
                 if (!success) {
                     Toast.makeText(this.context, msg, Toast.LENGTH_LONG).show()
                 }
-                (this.activity as ProfileActivity).hideDialog()
+                currentActivity?.hideDialog()
             }
         }
 
-        loginFragmentBinding.emailEditTextLogin.setText(profileViewModel.currentEntries[0])
-        loginFragmentBinding.passwordEditTextLogin.setText(profileViewModel.currentEntries[1])
+        val entries = profileViewModel
+            .currentAuthScreenEntries as ProfileViewModel.LogInEntries
 
-        addListener(loginFragmentBinding.emailEditTextLogin, profileViewModel, 0)
-        addListener(loginFragmentBinding.passwordEditTextLogin, profileViewModel, 1)
+        loginFragmentBinding.emailEditTextLogin.setText(entries.email)
+        loginFragmentBinding.passwordEditTextLogin.setText(entries.password)
+
+        loginFragmentBinding.emailEditTextLogin.setTextListener {
+            entries.email = it
+        }
+        loginFragmentBinding.passwordEditTextLogin.setTextListener {
+            entries.password = it
+        }
 
         return loginFragmentBinding.root
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is ProfileActivity) {
+            currentActivity = context
+        }
     }
 
 }

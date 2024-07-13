@@ -4,25 +4,25 @@ import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.piccy.model.auth.Authenticator
-import com.example.piccy.model.auth.FirebaseAuthenticator
-import com.example.piccy.model.auth.UserAuthenticationState
+import com.example.piccy.model.auth.AuthKt
+import com.example.piccy.model.auth.FbAuthKt
+import com.example.piccy.model.auth.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ProfileViewModel : ViewModel() {
 
-    private val authenticator: Authenticator by lazy {
-        FirebaseAuthenticator()
-    }
+    private val authKt: AuthKt = FbAuthKt()
+
     val loading = MutableLiveData(true)
+
+    private var currentUser: User? = null
 
     var currentScreen: MutableLiveData<ProfileScreen> = MutableLiveData(ProfileScreen.ANONYMOUS)
         private set
 
-    var currentEntries = mutableListOf("", "", "")
-        private set
+    var currentAuthScreenEntries: AuthScreenEntries? = null
 
     val toast: MutableLiveData<String> = MutableLiveData("")
 
@@ -30,102 +30,111 @@ class ProfileViewModel : ViewModel() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            authenticator.checkAuthState(
-                {
-                    val screen = when (authenticator.userAuthenticationState) {
-                        UserAuthenticationState.NONE -> ProfileScreen.ANONYMOUS
-                        UserAuthenticationState.REGISTERED -> ProfileScreen.VERIFICATION
-                        UserAuthenticationState.VERIFIED -> ProfileScreen.DETAILS
-                    }
-                    viewModelScope.launch(Dispatchers.Main) {
-                        currentScreen.postValue(screen)
+            authKt
+                .getUserFlow()
+                .collect { user ->
+                    currentUser = user
+                    if (loading.value != false) {
                         loading.postValue(false)
                     }
-                },
-                {
-                    loading.postValue(false)
-                    toast.postValue(it ?: "null")
+                    withContext(Dispatchers.Main) {
+                        updateScreenByUser(user)
+                    }
                 }
-            )
-
         }
+    }
+
+    private fun updateScreenByUser(user: User?) {
+        val screen = if (user == null) ProfileScreen.ANONYMOUS
+            else if (!user.emailVerified) ProfileScreen.VERIFICATION
+            else ProfileScreen.DETAILS
+        updateScreen(screen)
     }
 
     fun updateScreen(screen: ProfileScreen) {
         if (screen == currentScreen.value) return
 
+        currentAuthScreenEntries = when (screen) {
+            ProfileScreen.LOGIN -> LogInEntries()
+            ProfileScreen.SIGNUP -> SignInEntries()
+            else -> null
+        }
         currentScreen.value = screen
-        currentEntries = mutableListOf("", "", "")
-    }
-
-    fun updateEntryAt(index: Int, str: String?) {
-        currentEntries[index] = str ?: ""
     }
 
     fun login(onComplete: (Boolean, String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            authenticator.logIn(currentEntries[0], currentEntries[1]) { successful, msg ->
-                onComplete(successful, msg)
-                when (authenticator.userAuthenticationState) {
-                    UserAuthenticationState.NONE -> {}
-                    UserAuthenticationState.REGISTERED -> {
-                        updateScreen(ProfileScreen.VERIFICATION)
-                    }
-                    UserAuthenticationState.VERIFIED -> {
-                        updateScreen(ProfileScreen.DETAILS)
-                    }
+            try {
+                val entries = currentAuthScreenEntries as LogInEntries
+                withContext(Dispatchers.IO) {
+                    authKt.logIn(
+                        email = entries.email,
+                        password = entries.password
+                    )
                 }
+                onComplete(true, "")
+            } catch (e: ClassCastException) {
+                throw e
+            } catch (e: NullPointerException) {
+                throw e
+            } catch (e: Exception) {
+                onComplete(false, e.message ?: "An error occurred while Logging In")
             }
         }
     }
 
     fun signup(onComplete: (Boolean, String) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            authenticator.signUp(
-                currentEntries[0],
-                currentEntries[1],
-                currentEntries[2]
-            ) { successful, msg ->
-                onComplete(successful, msg)
-                when (authenticator.userAuthenticationState) {
-                    UserAuthenticationState.NONE -> {}
-                    UserAuthenticationState.REGISTERED -> {
-                        updateScreen(ProfileScreen.VERIFICATION)
-                    }
-                    UserAuthenticationState.VERIFIED -> {
-                        updateScreen(ProfileScreen.DETAILS)
-                    }
+        viewModelScope.launch {
+            try {
+                val entries = currentAuthScreenEntries as SignInEntries
+                withContext(Dispatchers.IO) {
+                    authKt.register(
+                        email = entries.email,
+                        password = entries.password,
+                        userName = entries.userName
+                    )
                 }
+                onComplete(true, "")
+            } catch (e: ClassCastException) {
+                throw e
+            } catch (e: NullPointerException) {
+                throw e
+            } catch (e: Exception) {
+                onComplete(false, e.message ?: "An error occurred while Singing In")
             }
         }
     }
 
-    fun resendVerificationEmail(onComplete: (Boolean) -> Unit) {
-        authenticator.resendVerificationEmail {
-            onComplete(it)
+    suspend fun resendVerificationEmail() {
+        withContext(Dispatchers.IO) {
+            authKt.resendVerificationEmail()
         }
     }
 
-    fun getEmail(): String? {
-        return authenticator.email
-    }
+    fun getEmail() = currentUser?.email
 
-    fun isEmailVerified(onComplete: (Boolean) -> Unit) {
-        return authenticator.isVerified{
-            onComplete(it)
+    suspend fun isEmailVerified(): Boolean {
+        return withContext(Dispatchers.IO) {
+            authKt.reloadEmailVerificationState()
         }
     }
 
-    fun getUsername(): String? {
-        return authenticator.userName
-    }
+    fun getUsername() = currentUser?.userName
 
     fun setPfp(pfp: Uri?) {
         this.pfp.postValue(pfp)
     }
 
-    override fun onCleared() {
-        authenticator.close()
-        super.onCleared()
-    }
+    interface AuthScreenEntries
+
+    class SignInEntries(
+        var email: String = "",
+        var userName: String = "",
+        var password: String = ""
+    ): AuthScreenEntries
+
+    class LogInEntries(
+        var email: String = "",
+        var password: String = ""
+    ): AuthScreenEntries
 }
