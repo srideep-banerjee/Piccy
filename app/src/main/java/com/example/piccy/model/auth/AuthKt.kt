@@ -8,4 +8,5 @@ interface AuthKt {
     suspend fun logIn(email: String, password: String)
     suspend fun reloadEmailVerificationState(): Boolean
     suspend fun resendVerificationEmail()
+    suspend fun signOut()
 }

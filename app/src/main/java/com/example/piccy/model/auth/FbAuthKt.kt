@@ -110,4 +110,8 @@ class FbAuthKt: AuthKt {
             .sendEmailVerification()
             .await()
     }
+
+    override suspend fun signOut() {
+        FirebaseAuth.getInstance().signOut()
+    }
 }

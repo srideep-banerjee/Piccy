@@ -6,9 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import com.example.piccy.R
+import androidx.lifecycle.lifecycleScope
 import com.example.piccy.databinding.FragmentDetailsBinding
 import com.example.piccy.viewmodels.ProfileViewModel
+import kotlinx.coroutines.launch
 
 class DetailsFragment : Fragment() {
 
@@ -22,6 +23,12 @@ class DetailsFragment : Fragment() {
         val profileViewModel by activityViewModels<ProfileViewModel>()
 
         detailsFragmentBinding.userNameDisplay.text = profileViewModel.getUsername()?:""
+
+        detailsFragmentBinding.signOutButton.setOnClickListener {
+            lifecycleScope.launch {
+                profileViewModel.signOut()
+            }
+        }
 
         return detailsFragmentBinding.root
     }

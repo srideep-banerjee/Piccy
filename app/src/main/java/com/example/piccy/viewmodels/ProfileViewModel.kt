@@ -119,6 +119,12 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+    suspend fun signOut() {
+        withContext(Dispatchers.IO) {
+            authKt.signOut()
+        }
+    }
+
     fun getUsername() = currentUser?.userName
 
     fun setPfp(pfp: Uri?) {
